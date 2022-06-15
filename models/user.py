@@ -13,10 +13,11 @@ class User(db.Model):
     created_at = db.Column(db.DateTime(), nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
+    # phone_valid(phone:str) -> bool
     @staticmethod
-    def phone_validation(phone: str) -> Match[str] | None:
+    def phone_valid(phone: str) -> bool:
         regular = r'^(\+7|7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$'
-        return re.match(regular, phone)
+        return bool(re.match(regular, phone))
 
     def save(self):
         db.session.add(self)

@@ -1,5 +1,6 @@
-from passlib.hash import pbkdf2_sha256
+import bcrypt
 
 
 def hash_password(password):
-    return pbkdf2_sha256.hash(password)
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode(), salt).decode('utf-8')

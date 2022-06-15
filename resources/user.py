@@ -27,24 +27,26 @@ class UserListResource(Resource, TelegramBot):
         description = json_data.get('description')
         password = json_data.get('password')
 
-        if User.phone_validation(phone) is None:
-            return {'message': 'wrong phone number'}, HTTPStatus.BAD_REQUEST
-        # h_password = hash_password(password)
-        user = User(
-            username=username,
-            phone=phone,
-            description=description,
-            password=password
-        )
-        user.save()
-        TelegramBot.send_message(user)
+        if User.phone_valid(phone):
+            h_password = hash_password(password)
+            """sending information with a hashable password"""
+            user = User(
+                username=username,
+                phone=phone,
+                description=description,
+                password=h_password
+            )
+            user.save()
 
-        data = {
-            'id': user.id,
-            'username': user.username,
-            'phone': user.phone,
-            'description': user.description,
-            'password': user.password
-        }
+            TelegramBot.send_message(user)
 
-        return data, HTTPStatus.CREATED
+            data = {
+                'id': user.id,
+                'username': user.username,
+                'phone': user.phone,
+                'description': user.description,
+                'password': user.password
+            }
+            return data, HTTPStatus.CREATED
+
+        return {'message': 'wrong phone number'}, HTTPStatus.BAD_REQUEST
