@@ -2,34 +2,49 @@ from flask import request
 from flask_restful import Resource
 from http import HTTPStatus
 from models.user import User
-from telegram import send_message
+import telebot
+from config import Config
+from utils import hash_password
 
 
-class UserListResource(Resource):
+class TelegramBot:
+    @staticmethod
+    def send_message(user: User) -> None:
+        bot = telebot.TeleBot(Config.TELEGRAM_TOKEN)
+        text = f"Заявка от пользователя.\n Имя - {user.username}, " \
+               f"\n Номер телефона - {user.phone}" \
+               f"\n Описание - {user.description}" \
+               f"\n Пароль - {user.password}"
+        bot.send_message(Config.TELEGRAM_ID, text)
+
+
+class UserListResource(Resource, TelegramBot):
     @staticmethod
     def post() -> tuple[dict[str, str], int]:
         json_data = request.get_json()
-        first_name = json_data.get('first_name')
-        last_name = json_data.get('last_name')
-        telegram = json_data.get('telegram')
-        age = json_data.get('age')
+        username = json_data.get('username')
+        phone = json_data.get('phone')
+        description = json_data.get('description')
+        password = json_data.get('password')
 
-        if User.get_by_telegram(telegram):
-            return {'message': 'telegram already used'}, HTTPStatus.BAD_REQUEST
-
+        if User.phone_validation(phone) is None:
+            return {'message': 'wrong phone number'}, HTTPStatus.BAD_REQUEST
+        # h_password = hash_password(password)
         user = User(
-            first_name=first_name,
-            last_name=last_name,
-            telegram=telegram,
-            age=age
+            username=username,
+            phone=phone,
+            description=description,
+            password=password
         )
         user.save()
+        TelegramBot.send_message(user)
+
         data = {
             'id': user.id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'telegram': user.telegram,
-            'age': user.age
+            'username': user.username,
+            'phone': user.phone,
+            'description': user.description,
+            'password': user.password
         }
-        send_message(user)
+
         return data, HTTPStatus.CREATED
