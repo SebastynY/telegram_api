@@ -1,8 +1,6 @@
 from flask import Flask
-from flask_migrate import Migrate
 from flask_restful import Api
 from config import Config
-from db import Base
 from resources.user import UserListResource
 
 
