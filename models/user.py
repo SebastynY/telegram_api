@@ -15,10 +15,14 @@ class User(Base):
     updated_at = Column(DateTime(), nullable=False, server_default=func.now(), onupdate=func.now())
 
     @staticmethod
-    def phone_valid(phone: str) -> bool:
+    def phone_valid(phone):
         regular = r'^(\+7|7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$'
         return bool(re.match(regular, phone))
 
     def save(self):
-        session.add(self)
-        session.commit()
+        try:
+            session.add(self)
+            session.commit()
+        except:
+            session.rollback()
+            raise

@@ -9,7 +9,7 @@ from utils import hash_password
 
 class TelegramBot:
     @staticmethod
-    def send_message(user: User) -> None:
+    def send_message(user):
         bot = telebot.TeleBot(Config.TELEGRAM_TOKEN)
         text = f"Заявка от пользователя.\n Имя - {user.username}, " \
                f"\n Номер телефона - {user.phone}" \
@@ -20,7 +20,7 @@ class TelegramBot:
 
 class UserListResource(Resource, TelegramBot):
     @staticmethod
-    def post() -> tuple[dict[str, str], int]:
+    def post():
         json_data = request.get_json()
         username = json_data.get('username')
         phone = json_data.get('phone')
